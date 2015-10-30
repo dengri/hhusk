@@ -24,7 +24,7 @@ $urls = squeeze_href($elements);
 
 $i = 0;
 
-$inf_table = array_map(
+$info_table = array_map(
 												function($title, $tag, $url){ 
 
 														global $i;
@@ -34,6 +34,8 @@ $inf_table = array_map(
 														if($i>3) return;
 
 														$tag = trim($tag);
+														$tag = preg_replace('/ /', ', ', $tag);
+														$tag = preg_replace('/\./', ' ', $tag);
 														$url = 'http://empornium.me/' . htmlspecialchars_decode($url);
 														
 														$md5 = save_torrent($url, $counter . '_' . $title);
@@ -50,6 +52,6 @@ $inf_table = array_map(
 												$urls
 											);	
 
-print_r($inf_table);
+print_r($info_table);
 
 ?>
