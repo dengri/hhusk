@@ -24,7 +24,7 @@ function get_page($url){
 
 	$ch = curl_init();
 
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 	curl_setopt($ch, CURLOPT_COOKIEFILE, "cookiejar");
 	curl_setopt($ch, CURLOPT_URL, $url);
 
@@ -55,18 +55,34 @@ function squeeze_href($elements){
 
 
 function save_torrent($url, $torrent_file_name){
-	$torrent_file_name = $torrent_file_name . ".torrent";
-	$res = fopen("torrents/$torrent_file_name", "w+");
+
+	$torrent_file_name = 'torrents/' . $torrent_file_name . ".torrent";
+
+	$res = fopen("$torrent_file_name", "w+");
 
 	$ch = curl_init();
+
+
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 	curl_setopt($ch, CURLOPT_FILE, $res);
 	curl_setopt($ch, CURLOPT_COOKIEFILE, "cookiejar");
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
 	$buf = curl_exec($ch);
 	curl_close($ch);
 
+	fclose($res);
+
+	return hash_file('md5', $torrent_file_name);
+
 }
 
+function get_counter($i){
 
+   if ($i<10) $counter="000".$i;
+	   elseif ($i<100) $counter="00".$i;
+	     elseif ($i<1000) $counter="0".$i;
+
+	 return $counter;
+}
