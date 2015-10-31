@@ -21,15 +21,19 @@ class Database{
 		}
 	}
 
+
 	function getConnection(){
 		return $this->con;	
 	}
 
-	function saveFileInfo(){
 
-		$qstring = "INSERT INTO torrents (title, tags, urls) VALUES($title, $tag, $url)";
+	function append($val){
 
-		return $con->query($qstring);	
+	\extract($val);
+		
+		$qstring = "INSERT INTO torrents (title, tags, url, md5, file_name, file_size) VALUES ('$title', '$tags', '$url', '$md5', '$file_name', '$file_size')";
+
+		return $this->con->exec($qstring);	
 	}
 }
 

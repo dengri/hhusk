@@ -1,5 +1,7 @@
 <?php
 
+define('NUM_TORRENTS', 50);
+
 function login($url){
 
 	$ch = curl_init();
@@ -37,18 +39,24 @@ function get_page($url){
 
 
 function squeeze_plain_text($elements){
+	$i=1;
 	$a = array();
 	foreach($elements as $element){
+		if($i>NUM_TORRENTS) break;
 		$a[] = $element->plaintext;
+		$i++;
 	}
 	return $a;
 }
 
 
 function squeeze_href($elements){
+	$i=1;
 	$a = array();
 	foreach($elements as $element){
+		if($i>NUM_TORRENTS) break;
 		$a[] = $element->href;
+		$i++;
 	}
 	return $a;
 }
@@ -56,7 +64,7 @@ function squeeze_href($elements){
 
 function save_torrent($url, $torrent_file_name){
 
-	$torrent_file_name = 'torrents/' . $torrent_file_name . ".torrent";
+	$torrent_file_name = 'torrents/' . $torrent_file_name;
 
 	$res = fopen("$torrent_file_name", "w+");
 
@@ -74,7 +82,7 @@ function save_torrent($url, $torrent_file_name){
 
 	fclose($res);
 
-	return hash_file('md5', $torrent_file_name);
+	//return hash_file('md5', $torrent_file_name);
 
 }
 
@@ -86,3 +94,39 @@ function get_counter($i){
 
 	 return $counter;
 }
+
+
+
+function save_torrent_files($title, $tags, $url, $file_size){ 
+
+ 	global $i;
+	
+	$filename = preg_replace('/[^a-z0-9\._]/i', '-', $title);
+	$filename = preg_replace('/-+/i', '-', $filename);
+	$filename = trim($filename, '-') . '.torrent';
+
+	$md5 = md5($filename);
+
+	$filename = get_counter(++$i) . '_' . $md5 . '_' . $filename;
+
+ 	$tags = trim($tags);
+ 	$tags = preg_replace('/ /', ', ', $tags);
+ 	$tags = preg_replace('/\./', ' ', $tags);
+
+ 	$url = htmlspecialchars_decode($url);
+ 	save_torrent($url, $filename);
+
+ 	return array(	'title'		  => $title, 
+								'file_name'  => $filename,
+ 								'tags'      => $tags, 
+ 								'url'       => $url,
+ 								'md5'       => $md5,
+								'file_size' => $file_size
+ 							); 
+}
+
+
+function save_parsed_to_db($row){
+									global $db;
+									$db->append($row);
+							}

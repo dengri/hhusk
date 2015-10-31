@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS `torrents`(
 `tags` varchar(225) DEFAULT NULL,
 `url` varchar(255) DEFAULT NULL,
 `md5` varchar(50) DEFAULT NULL,
+`file_name` varchar(255) DEFAULT NULL,
+`file_size` varchar(10) DEFAULT NULL,
 PRIMARY KEY(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 

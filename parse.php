@@ -2,56 +2,67 @@
 
 require 'functions.php';
 require 'simple_html_dom.php';
+require 'Database.class.php';
 
 login('http://www.empornium.me/login.php');
 
-$str = get_page('http://www.empornium.me/torrents.php');
+//$str = get_page('http://www.empornium.me/torrents.php');
+$str = get_page('http://www.empornium.me/torrents.php?order_by=time&order_way=desc&searchtext=&search_type=0&taglist=jerk.off.instructions&tags_type=0');
 
 file_put_contents('page.html', $str);
 
-
+/*===============================================================================================*
+ *																Get ALL page rows
+/*===============================================================================================*/
 
 $dom = file_get_html('page.html');
+$rows = $dom->find('tr[class*="torrent row"]');
 
-$elements = $dom->find('a[onmouseout="return nd();"]');
-$titles = squeeze_plain_text($elements);
+echo count($rows);
+echo "\n";
 
-$elements = $dom->find('div.tags');
-$tags = squeeze_plain_text($elements);
+/*===============================================================================================*
+ *																Get file sizes inside the rows
+/*===============================================================================================*/
+$tds = array();
+foreach($rows as $row)
+		$tds[] = $row->children(5);
 
-$elements = $dom->find('a[title="Download Torrent"]');
-$urls = squeeze_href($elements);
+$file_sizes = squeeze_plain_text($tds);
+//$file_sizes = array_map(function($e){return (float)$e;}, $file_sizes);
 
-$i = 0;
+/*===============================================================================================*
+ *																Get download URLs for torrents inside the rows
+/*===============================================================================================*/
+$urls = array();
+foreach($rows as $row)
+		$urls[] = 'http://empornium.me/' . $row->children(1)->find('a[href^=torrents.php?action=download]')[0]->href;
 
-$info_table = array_map(
-												function($title, $tag, $url){ 
 
-														global $i;
 
-														$counter = get_counter(++$i); 
+/*===============================================================================================*
+ *																Get post titles inside the rows
+/*===============================================================================================*/
+$titles = array();
+foreach($rows as $row)
+		$titles[] = $row->children(1)->find('a[onmouseout=return nd();]')[0]->plaintext;
 
-														if($i>3) return;
 
-														$tag = trim($tag);
-														$tag = preg_replace('/ /', ', ', $tag);
-														$tag = preg_replace('/\./', ' ', $tag);
-														$url = 'http://empornium.me/' . htmlspecialchars_decode($url);
-														
-														$md5 = save_torrent($url, $counter . '_' . $title);
 
-														return array(	'title' => $title, 
-																					'tags'	=> $tag, 
-																					'url'		=> $url,
-																					'md5'		=> $md5
-																				); 
-												}, 
+/*===============================================================================================*
+ *																Get post tags inside the rows
+/*===============================================================================================*/
+$tags = array();
+foreach($rows as $row)
+		$tags[] = $row->children(1)->find('div.tags')[0]->plaintext;
 
-												$titles,
-												$tags,
-												$urls
-											);	
+
+$db = new Database\Database('sitecontent', 'root', 'qxwv35azsc');
+
+$info_table = array_map( 'save_torrent_files', $titles, $tags, $urls, $file_sizes	);	
 
 print_r($info_table);
+
+array_filter($info_table, 'save_parsed_to_db');
 
 ?>
