@@ -63,7 +63,6 @@ function squeeze_href($elements){
 
 
 function save_torrent($url, $torrent_file_name){
-
 	$torrent_file_name = 'torrents/' . $torrent_file_name;
 
 	$res = fopen("$torrent_file_name", "w+");
@@ -107,7 +106,7 @@ function save_torrent_files($title, $tags, $url, $file_size){
 
 	$md5 = md5($filename);
 
-	$filename = get_counter(++$i) . '_' . $md5 . '_' . $filename;
+	$filename = /*get_counter(++$i) . '_' . */$md5 . '_' . $filename;
 
  	$tags = trim($tags);
  	$tags = preg_replace('/ /', ', ', $tags);
@@ -127,6 +126,12 @@ function save_torrent_files($title, $tags, $url, $file_size){
 
 
 function save_parsed_to_db($row){
-									global $db;
-									$db->append($row);
-							}
+	global $db;
+	$db->append($row);
+}
+
+
+function get_md5_from_filename($filename){
+	return substr($filename, 0, 31);
+}
+
